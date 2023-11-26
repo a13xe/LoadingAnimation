@@ -20,28 +20,29 @@ const int ANIMATION_SYMBOL_COUNT = sizeof(ANIMATION_SYMBOLS) / sizeof(ANIMATION_
 
 // Main class
 // ----------------------------------------------------------------------------------------------
-class ConsoleWaitAnimation
+class ConsoleLoadingAnimation
 {
 public:
-    ConsoleWaitAnimation() : currentIndex(0) {}
+    ConsoleLoadingAnimation() : currentIndex(0) {}
     void start()
     {
         isRunning = true;
-        animThread = std::thread(&ConsoleWaitAnimation::runAnimation, this);
+        animThread = std::thread(&ConsoleLoadingAnimation::runAnimation, this);
     }
     void stop()
     {
-        clearCurrentLine();
         isRunning = false;
         if (animThread.joinable())
         {
             animThread.join();
         }
+        clearCurrentLine(); // Clear the line after stopping the animation
     }
 private:
     int currentIndex;
     std::thread animThread;
     bool isRunning = false;
+
     void runAnimation()
     {
         while (isRunning)
@@ -53,7 +54,7 @@ private:
     }
     void clearCurrentLine()
     {
-        std::cout << "\r" << std::string(100, ' ') << "\r";
+        std::cout << "\r" << std::string(100, ' ') << "\r" << std::flush;
     }
 };
 
@@ -61,11 +62,11 @@ private:
 // Function template for non-void returning functions
 // ----------------------------------------------------------------------------------------------
 template <typename Func, typename... Args>
-auto wait_anim(Func func, Args&&... args) ->
+auto loading_anim(Func func, Args&&... args) ->
 typename std::enable_if<!std::is_void<typename std::result_of<Func(Args...)>::type>::value,
 typename std::result_of<Func(Args...)>::type>::type
 {
-    ConsoleWaitAnimation animation;
+    ConsoleLoadingAnimation animation;
     animation.start();
     auto result = func(std::forward<Args>(args)...);
     animation.stop();
@@ -76,10 +77,10 @@ typename std::result_of<Func(Args...)>::type>::type
 // Overload for void returning functions
 // ----------------------------------------------------------------------------------------------
 template <typename Func, typename... Args>
-auto wait_anim(Func func, Args&&... args) ->
+auto loading_anim(Func func, Args&&... args) ->
 typename std::enable_if<std::is_void<typename std::result_of<Func(Args...)>::type>::value>::type
 {
-    ConsoleWaitAnimation animation;
+    ConsoleLoadingAnimation animation;
     animation.start();
     func(std::forward<Args>(args)...);
     animation.stop();
