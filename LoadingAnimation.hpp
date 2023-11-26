@@ -11,9 +11,9 @@
 // Animation symbols and speed configuration
 // ----------------------------------------------------------------------------------------------
 // Speed of the animation in milliseconds
-const int ANIMATION_SPEED_MS = 200;
+const int ANIMATION_SPEED_MS = 100;
 // Symbols
-const char ANIMATION_SYMBOLS[] = {'|', '/', '-', '\\'}; // '-', '=', 'x', 'X', '|', 'X', 'x', '='
+const char ANIMATION_SYMBOLS[] = {'|', '/', '-', '\\'};
 // Symbol counter
 const int ANIMATION_SYMBOL_COUNT = sizeof(ANIMATION_SYMBOLS) / sizeof(ANIMATION_SYMBOLS[0]);
 
@@ -31,12 +31,12 @@ public:
     }
     void stop()
     {
+        clearCurrentLine();
         isRunning = false;
         if (animThread.joinable())
         {
             animThread.join();
         }
-        clearCurrentLine(); // Clear the line after stopping the animation
     }
 private:
     int currentIndex;
@@ -53,8 +53,7 @@ private:
     }
     void clearCurrentLine()
     {
-        std::cout << "\r" << std::string(100, ' ') << "\r"; // Attempt to clear the line
-        std::cout << std::endl; // Move to a new line
+        std::cout << "\r" << std::string(100, ' ') << "\r";
     }
 };
 
